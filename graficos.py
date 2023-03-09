@@ -19,6 +19,10 @@ df = pd.DataFrame.from_records(data.log, columns=data.columns)
 fig = px.scatter(df, x='Time', y='T1')
 
 app.layout = html.Div([
+    dcc.Input(
+        placeholder = "Enter a value:"
+    ),
+
     dcc.Graph(id='ambient-output',figure=fig),
     #dcc.Input(id='ambient-info-input')    
 ])

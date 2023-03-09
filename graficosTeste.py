@@ -11,29 +11,36 @@ heating_time = 10
 
 lab = tclab.TCLab()
 data = tclab.Historian(lab.sources)
-
 for t in tclab.clock(measuring_time):
     lab.Q1(100 if t <= heating_time else 0)
-    data.update(t)
-    T1 = lab.T1
+    data.update(t)     
 
+df = pd.DataFrame.from_records(data.log, columns=data.columns)
+fig = px.scatter(df, x='Time', y='T1')
 
 app.layout = html.Div([
-    dcc.Graph(id='ambient-info-output'),
-    html.Div([
-        "Valor atual:",
-        html.H1(id='ambient-info-input',children = T1)
-    ])
-])      
+    dcc.Input(
+        id = 'user_input',
+        placeholder = "Enter a value:",
+        type = 'number',
+        value = '',
+    ),
+    html.Div(id='user_output',type = 'hidden')
+    dcc.Graph(id='ambient-output',figure=fig),
+    #dcc.Input(id='ambient-info-input')    
+])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
 
+#@app.callback(
+#    Output('ambient-info-output','figure'),
+#    Input('ambient-info-input','value')
+#)
+#def update_figure(ambient-variation):
+
 @app.callback(
-    Output('ambient-info-output','figure'),
-    Input('ambient-info-input','children')
+    Output()
 )
-def update_figure(ambientVariation):
-    df = pd.DataFrame.from_records(data.log[:20], columns=data.columns)
-    fig = px.scatter(df, x='Time', y='T1')
-    return fig
+def update_input():
+    block = 1
