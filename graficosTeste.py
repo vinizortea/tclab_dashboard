@@ -20,27 +20,21 @@ fig = px.scatter(df, x='Time', y='T1')
 
 app.layout = html.Div([
     dcc.Input(
-        id = 'user_input',
-        placeholder = "Enter a value:",
-        type = 'number',
-        value = '',
+        id='user_input', 
+        placeholder="Enter a value:", 
+        type='number', 
+        value=''
     ),
-    html.Div(id='user_output',type = 'hidden')
-    dcc.Graph(id='ambient-output',figure=fig),
-    #dcc.Input(id='ambient-info-input')    
+    html.Div(id='user_output', type='hidden'),
+    dcc.Graph(id='ambient-output', figure=fig),
+    # dcc.Input(id='ambient-info-input')    
 ])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
 
-#@app.callback(
-#    Output('ambient-info-output','figure'),
-#    Input('ambient-info-input','value')
-#)
-#def update_figure(ambient-variation):
-
-@app.callback(
-    Output()
-)
-def update_input():
-    block = 1
+# @app.callback(
+#     Output('ambient-info-output','figure'),
+#     Input('ambient-info-input','value')
+# )
+# def update_figure(ambient-variation):
