@@ -1,0 +1,4 @@
+Links utilizados para customização:
+    https://hackerthemes.com/bootstrap-cheatsheet/
+
+    https://www.bootstrapcdn.com/bootswatch/
