@@ -16,13 +16,23 @@ df = pd.DataFrame.from_records(data=data)
 fig = px.scatter(df, x='col1', y='col2')
 
 layout = dbc.Container([
-    dbc.Card([
-        dbc.CardHeader("Gráfico".upper()),
-        dbc.CardBody([
-            dcc.Graph(id='ambient-output', figure=fig),
-        ]) 
-    ])   
-])
+
+    dbc.Row([
+        dbc.Col([
+            dbc.Label("Escolha tal parâmetro: "),
+            dcc.Slider(id="slider", min=0, max=10, step=1, value=0),
+            dbc.Card([
+                dbc.CardHeader("Gráfico".upper(),class_name="-text-center"),
+                dbc.CardBody([
+                dcc.Graph(id='ambient-output', figure=fig),
+                ]) 
+            ]),
+            dbc.Button("Submeter",id="info-button",size="sm",class_name="mt-2"),
+        ],
+        width={'size':5, 'offset':1},
+        ), 
+    ]),   
+], fluid=True)
 
 #app.layout = html.Div([
 #    html.Div([

@@ -1,8 +1,6 @@
-from dash import html
+from dash import html, dcc
 import dash
 import dash_bootstrap_components as dbc
-
-from assets.styles import *
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SOLAR],
                 meta_tags=[{'name': 'viewport',
@@ -14,19 +12,7 @@ app.layout = html.Div([
 
     dbc.NavbarSimple(
         children=[
-            html.H1("Interface gráfica GIMSCOP",className="text-center text-success"),
             # Adiciona logos
-            dbc.NavItem(dbc.NavLink(
-                html.A(
-                    html.Img(
-                        src=app.get_asset_url('figures/petrobras-logo-h.svg'),
-                        style={
-                            'height' : '20px',
-                    }),
-                    href="https://petrobras.com.br/pt/",
-                ),
-            )
-            ),
             dbc.NavItem(dbc.NavLink(
                 html.A(
                     html.Img(
@@ -48,20 +34,19 @@ app.layout = html.Div([
                 nav=True,
                 in_navbar=True,
                 label="Mais páginas",
+                toggleClassName="text-success",
+                menu_variant="dark"
             ),
         ],
-            color="dark",
-            dark=True,
+        # Branding
+        brand="Interface gráfica GIMSCOP",
+        brand_href=dash.page_registry['pages.pagina_1']['path'],
+        color="dark",
+        id="navbar"
+            
             
     ),
-
-    dbc.Row(
-        [
-            html.H1("Interface gráfica GIMSCOP",className="text-center text-success mt-2 mb-4")
-        ],
-    ),
-
-
+    
     dash.page_container
 ])
 
