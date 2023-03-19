@@ -28,7 +28,7 @@ app.layout = html.Div([
             # Adiciona página ao dropdown
             dbc.DropdownMenu(
                 children=[
-                    dbc.DropdownMenuItem("Pagina 1", href=dash.page_registry['pages.pagina_1']['path']),
+                    dbc.DropdownMenuItem("Página 1", href=dash.page_registry['pages.pagina_1']['path']),
                 ],
                 # adiciona dropdown de navegação
                 nav=True,

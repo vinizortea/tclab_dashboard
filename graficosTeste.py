@@ -13,7 +13,7 @@ lab = tclab.TCLab()
 data = tclab.Historian(lab.sources)
 for t in tclab.clock(measuring_time):
     lab.Q1(100 if t <= heating_time else 0)
-    data.update(t)     
+    data.update(t)
 
 df = pd.DataFrame.from_records(data.log, columns=data.columns)
 fig = px.scatter(df, x='Time', y='T1')
