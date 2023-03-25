@@ -1,4 +1,4 @@
-from dash import Dash, dcc, html, Input, Output, State, callback
+from dash import Dash, dcc, html, Input, Output, State, long_callback
 import dash
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -65,19 +65,29 @@ layout = dbc.Container([
     ),
 ],fluid=False)
 
-@callback(
+@long_callback(
     output = Output('grafico-temperatura','figure'),
     inputs=(State('potencia','value'),
     State('tempo_medicao','value'),
     State('tempo_aquecimento','value'),
     Input('info-button', 'n_clicks')),
 
+    running=[
+        (Output('info-button','disabled'),True,False)
+    ],
+
     prevent_initial_call= True
     
 )
 def update_figure(n_clicks, potencia, tempo_medicao, tempo_aquecimento):
-    if(n_clicks == 1):
-        global lab = tclab.TCLab()
-        global data = tclab.Historian(lab.sources)
+    if(n_clicks == 0):
+        global lab
+        lab = tclab.TCLab()
+        global data
+        data = tclab.Historian(lab.sources)
 
     return graficos.grafico_temperatura(lab, data, potencia, tempo_medicao, tempo_aquecimento)
+
+# Ver dcc.Interval para atualizar página automaticamente, se precisar.
+# Pode ajudar, ou não.
+# Ver long_callback para isto tbm pode ajudar.
