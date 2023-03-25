@@ -18,7 +18,7 @@ app.layout = html.Div([
                     html.Img(
                         src=app.get_asset_url('figures/gimscop.png'),
                         style={
-                            'height' : '28px',
+                            'height': '28px',
                         }),
                         href="https://www.ufrgs.br/gimscop/",
                 ),
