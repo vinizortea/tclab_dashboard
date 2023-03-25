@@ -18,7 +18,7 @@ measuring_limit = 21
 heating_limit = measuring_limit - 1
 
 df = pd.DataFrame.from_records(data=data_pag1)
-fig = px.scatter(df, x='col1', y='col2')
+fig = px.line(df, x='col1', y='col2',markers=True)
 
 layout = dbc.Container([
 
@@ -28,12 +28,12 @@ layout = dbc.Container([
             dcc.Slider(id="potencia", min=0, max=100, step=5, value=0),
             dbc.Row([
                 dbc.Col([
-                    dcc.Input(placeholder="Tempo de medição",id="tempo_medicao",type="number",min=0,max=measuring_limit),
+                    dcc.Input(placeholder="Tempo de medição",id="tempo_medicao",type="number",min=0,max=measuring_limit,value=10),
                 ],
                 width={"size":2}
                 ),
                 dbc.Col([
-                    dcc.Input(placeholder="Tempo de aquecimento",id="tempo_aquecimento",type="number",min=0,max=heating_limit),
+                    dcc.Input(placeholder="Tempo de aquecimento",id="tempo_aquecimento",type="number",min=0,max=heating_limit,value=5),
                 ],
                 width={"size":2}
                 )
@@ -62,18 +62,22 @@ layout = dbc.Container([
         ),
     ],
     justify="center"
-    ),   
+    ),
 ],fluid=False)
 
 @callback(
-    Output('grafico-temperatura','figure'),
-    State('potencia','value'),
+    output = Output('grafico-temperatura','figure'),
+    inputs=(State('potencia','value'),
     State('tempo_medicao','value'),
     State('tempo_aquecimento','value'),
-    Input('info-button', 'n_clicks')
+    Input('info-button', 'n_clicks')),
+
+    prevent_initial_call= True
+    
 )
 def update_figure(n_clicks, potencia, tempo_medicao, tempo_aquecimento):
-    lab = tclab.TCLab()
-    data = tclab.Historian(lab.sources)
+    if(n_clicks == 1):
+        global lab = tclab.TCLab()
+        global data = tclab.Historian(lab.sources)
 
     return graficos.grafico_temperatura(lab, data, potencia, tempo_medicao, tempo_aquecimento)
