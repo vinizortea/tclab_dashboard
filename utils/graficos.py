@@ -11,6 +11,6 @@ def grafico_temperatura(lab, data, potencia, medicao, aquecimento):
         data.update(t)
 
     df = pd.DataFrame.from_records(data.log, columns=data.columns)
-    fig = px.scatter(df, x='Time', y='T1')
+    fig = px.line(df, x='Time', y='T1')
 
     return fig 

@@ -18,7 +18,7 @@ measuring_limit = 21
 heating_limit = measuring_limit - 1
 
 df = pd.DataFrame.from_records(data=data_pag1)
-fig = px.scatter(df, x='col1', y='col2')
+fig = px.line(df, x='col1', y='col2', markers=True)
 
 layout = dbc.Container([
 
