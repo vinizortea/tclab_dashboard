@@ -85,6 +85,7 @@ def update_figure(n_clicks, potencia, tempo_medicao, tempo_aquecimento):
         lab = tclab.TCLab()
         global data
         data = tclab.Historian(lab.sources)
+    # TESTAR TCLAB.CLOSE() PARA EVITAR TCLAB ABRIR OUTRA CONEXÃO QUANDO JÁ CONECTADO
 
     return graficos.grafico_temperatura(lab, data, potencia, tempo_medicao, tempo_aquecimento)
 
