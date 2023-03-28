@@ -13,4 +13,6 @@ def grafico_temperatura(lab, data, potencia, tempo_medicao:int, tempo_aqueciment
     df = pd.DataFrame.from_records(data.log, columns=data.columns)
     fig = px.line(df, x='Time', y='T1',markers=True)
 
+    lab.close()
+
     return fig 
