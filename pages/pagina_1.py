@@ -1,4 +1,4 @@
-from dash import Dash, dcc, html, Input, Output, State
+from dash import Dash, dcc, html, Input, Output, State, callback
 import dash
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -55,7 +55,12 @@ layout = dbc.Container([
                 dbc.CardHeader("Temperatura x Tempo".upper(),class_name="text-success text-center"),
                 dbc.CardBody([
                 dcc.Graph(id='grafico-temperatura', figure=fig),
-                ]) 
+                ]),
+                dcc.Interval(
+                    id="interval-component",
+                    interval=1000,
+                    n_intervals=0
+                )
             ]),
         ],
         width={"size":10, "offset":0}
@@ -63,7 +68,16 @@ layout = dbc.Container([
     ],
     justify="center"
     ),
-],fluid=False)
+],fluid=False),
+
+@callback(
+    Output('grafico-temperatura','figure'),
+    Input("interval-component","n_intervals"),
+    State("Submeter","n_clicks")
+)
+def update_graph(n_intervals):
+
+
 
 # Ver dcc.Interval para atualizar página automaticamente, se precisar.
 # Pode ajudar, ou não.

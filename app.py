@@ -2,15 +2,10 @@ from dash import Dash, dcc, html, Input, Output, State
 import dash
 import tclab
 import dash_bootstrap_components as dbc
-from dash.long_callback import DiskcacheLongCallbackManager
-
-import diskcache
-cache = diskcache.Cache("./cache")
-long_callback_manager = DiskcacheLongCallbackManager(cache)
 
 from utils import graficos
 
-app = dash.Dash(__name__, long_callback_manager=long_callback_manager,external_stylesheets=[dbc.themes.SOLAR],
+app = dash.Dash(__name__,external_stylesheets=[dbc.themes.SOLAR],
                 meta_tags=[{'name': 'viewport',
                             'content': 'width=device-width, initial-scale=1.0'}],
                 use_pages=True, pages_folder="pages"
@@ -57,27 +52,6 @@ app.layout = html.Div([
     
     dash.page_container
 ])
-
-@app.long_callback(
-    output = Output('grafico-temperatura','figure'),
-    inputs=(State('potencia','value'),
-    State('tempo_medicao','value'),
-    State('tempo_aquecimento','value'),
-    Input('info-button', 'n_clicks')),
-
-    running=[
-        (Output('info-button','disabled'),True,False)
-    ],
-
-    prevent_initial_call= True
-    
-)
-def update_figure(n_clicks, potencia, tempo_medicao, tempo_aquecimento):
-    lab = tclab.TCLab()
-    data = tclab.Historian(lab.sources)
-
-    return graficos.grafico_temperatura(lab, data, potencia, tempo_medicao, tempo_aquecimento)
-
 
 if __name__ == '__main__':
     import socket
