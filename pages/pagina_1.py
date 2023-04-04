@@ -1,4 +1,4 @@
-from dash import Dash, dcc, html, Input, Output, State, callback
+from dash import Dash, dcc, html, Input, Output, State, callback, ctx
 import dash
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -7,11 +7,14 @@ import pandas as pd
 
 from utils import graficos
 
-def tclab_conditions(n_intervals, lab, data, potencia):
+def tclab_conditions(n_intervals, lab, data, potencia, button_state):
     lab.Q1(potencia)
     data.update(n_intervals),
 
-    data_append = pd.DataFrame.from_records(data.log[n_intervals], columns=data.columns)
+    data_append = pd.DataFrame.from_records(data=data.log,index =[-1], columns=data.columns)
+
+    if(button_state == "Parar"):
+        lab.close()
 
     return data_append
 
@@ -51,7 +54,7 @@ layout = dbc.Container([
             ),
             dbc.Row([
                 dbc.Col([
-                    dbc.Button("Submeter",id="info-button",size="sm",color="success"),
+                    dbc.Button("Submeter",id="action-button",size="sm",color="success"),
                 ],
                 width={"size":1}
                 )
@@ -69,7 +72,7 @@ layout = dbc.Container([
                     disabled=True,
                     interval=1000,
                     n_intervals=0
-                )
+                ),
             ]),
         ],
         width={"size":10, "offset":0}
@@ -80,45 +83,46 @@ layout = dbc.Container([
 ],fluid=False),
 
 @callback(
-    Output("grafico-temperatura","figure"),
+    Output("grafico-temperatura","extendData"),
     Output("interval-component","disabled"),
     Output("interval-component","n_intervals"),
-    Output("info-button","children"),
-    Input("info-button","n_clicks"),
-    State("info-button","children"),
-    State("interval-component","n_intervals"),
-    State("grafico-temperatura","figure"),
+    Output("action-button","children"),
 
-    prevent_initial_call = True
-)
-def trigger_counter(n_clicks,children,n_intervals,figure):
-    if(children == "Submeter"):
-        # df = pd.DataFrame.from_records(data.log, columns=data.columns)
-        # fig = px.line(df, x='Time', y='T1',markers=True)
-        return False,0,"Parar"
-    elif(children == "Parar"):
-        # lab.close()
-        return True,n_intervals,"Submeter",figure
-
-@callback(
-    Output('grafico-temperatura','extendData'),
+    Input("action-button","n_clicks"),
     Input("interval-component","n_intervals"),
+
+    State("action-button","children"),
+    State("grafico-temperatura","figure"),
     State('potencia','value'),
-    State('tempo_medicao','value'),
-    State('tempo_aquecimento','value'),
 
     prevent_initial_call = True
 )
-def update_graph(n_intervals,potencia,tempo_medicao,tempo_aquecimento):
-    if(n_intervals == 0):
-        # global?????
-        lab = tclab.TCLab()
-        data = tclab.Historian(lab.sources)
+def trigger_update_graph(n_clicks,n_intervals,button_state,figure,potencia):
+    component_id = ctx.triggered_id
 
-    return tclab_conditions(n_intervals, lab, data, potencia),[0], 10
+    if(component_id == "action-button"):
+
+        if(button_state == "Submeter"):
+            lab = tclab.TCLab()
+            data = tclab.Historian(lab.sources)
+
+            button_state_aux = button_state
+        
+            return tclab_conditions(n_intervals,lab,data,potencia,button_state_aux),False,0,"Parar"
+        
+        elif(button_state == "Parar"):
+            
+            button_state_aux = button_state
+
+            return tclab_conditions(n_intervals,lab,data,potencia,button_state_aux),True,0,"Submeter"
+
+    elif(component_id == "interval-component"):
+
+        return tclab_conditions(n_intervals, lab, data, potencia,button_state),False,n_intervals,"Parar"
     
-    
-# return graficos.grafico_temperatura(lab, data, potencia, tempo_medicao, tempo_aquecimento)
+# Utilizar outro tipo de data que não seja o Dataframe,
+# usar o mesmo do exemplo do cara do stackoverflow (padrão do python e dash)
+
 
 # Ver dcc.Interval para atualizar página automaticamente, se precisar.
 # Pode ajudar, ou não.
