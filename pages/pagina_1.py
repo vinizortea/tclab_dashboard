@@ -7,14 +7,27 @@ import pandas as pd
 
 from utils import graficos
 
-def tclab_conditions(n_intervals, lab, data, potencia, button_state):
-    lab.Q1(potencia)
-    data.update(n_intervals),
+lab = [0]
+data = [0]
 
-    data_append = pd.DataFrame.from_records(data=data.log,index =[-1], columns=data.columns)
+def tclab_conditions(n_intervals,potencia,button_state,component_id):
 
-    if(button_state == "Parar"):
-        lab.close()
+    lab[0].Q1(potencia)
+    data[0].update(n_intervals)
+    # data_append = {
+    #     "Time": n_intervals,
+    #     "T1": lab[0].T1
+    # }
+
+    df = pd.DataFrame.from_records(data[0].log, columns=data[0].columns)
+    data_append = {
+        "Time": df.iloc[-1:]["Time"],
+        "T1": df.iloc[-1:]["T1"]
+    }
+
+    if button_state == "Parar" and component_id == "action-button":
+        print("dentro do if fechar")
+        lab[0].close()
 
     return data_append
 
@@ -103,22 +116,23 @@ def trigger_update_graph(n_clicks,n_intervals,button_state,figure,potencia):
     if(component_id == "action-button"):
 
         if(button_state == "Submeter"):
-            lab = tclab.TCLab()
-            data = tclab.Historian(lab.sources)
+
+            lab[0] = tclab.TCLab()
+            data[0] = tclab.Historian(lab[0].sources)
 
             button_state_aux = button_state
         
-            return tclab_conditions(n_intervals,lab,data,potencia,button_state_aux),False,0,"Parar"
+            return tclab_conditions(n_intervals,potencia,button_state_aux,component_id),False,0,"Parar"
         
         elif(button_state == "Parar"):
-            
+    
             button_state_aux = button_state
 
-            return tclab_conditions(n_intervals,lab,data,potencia,button_state_aux),True,0,"Submeter"
+            return tclab_conditions(n_intervals,potencia,button_state_aux,component_id),True,0,"Submeter"
 
     elif(component_id == "interval-component"):
 
-        return tclab_conditions(n_intervals, lab, data, potencia,button_state),False,n_intervals,"Parar"
+        return tclab_conditions(n_intervals,potencia,button_state,component_id),False,n_intervals,"Parar"
     
 # Utilizar outro tipo de data que não seja o Dataframe,
 # usar o mesmo do exemplo do cara do stackoverflow (padrão do python e dash)
