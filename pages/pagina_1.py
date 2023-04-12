@@ -13,36 +13,37 @@ data = [0]
 def tclab_conditions(n_intervals,potencia,button_state,component_id):
 
     lab[0].Q1(potencia)
-    data[0].update(n_intervals)
+    # data[0].update(n_intervals)
+    data_append = dict(
+        x = n_intervals,
+        y = lab[0].T1
+    )
+
+    #df = pd.DataFrame(data_append, columns=data[0].columns)
     # data_append = {
-    #     "Time": n_intervals,
-    #     "T1": lab[0].T1
+    #     "Time": df.iloc[-1:]["Time"],
+    #     "T1": df.iloc[-1:]["T1"]
     # }
 
-    df = pd.DataFrame.from_records(data[0].log, columns=data[0].columns)
-    data_append = {
-        "Time": df.iloc[-1:]["Time"],
-        "T1": df.iloc[-1:]["T1"]
-    }
-
     if button_state == "Parar" and component_id == "action-button":
-        print("dentro do if fechar")
+        lab[0].Q1(0)
         lab[0].close()
 
     return data_append
 
 dash.register_page(__name__, path='/', title='Pagina_1')
 
-data_pag1 = {
-    'col1': [1, 2, 3, 4, 5, 6, 7, 8, 9],
-    'col2': [1, 2, 3, 4, 5, 6, 7, 8, 9] 
-}
+# data_pag1 = {
+#     'Time': [1, 2, 3, 4, 5, 6, 7, 8, 9],
+#     'T1': [1, 2, 3, 4, 5, 6, 7, 8, 9] 
+# }
 
 measuring_limit = 100
 heating_limit = measuring_limit - 1
 
-df = pd.DataFrame.from_records(data=data_pag1)
-fig = px.line(df, x='col1', y='col2',markers=True)
+# df = pd.DataFrame.from_records(data=data_pag1)
+# fig = px.line(data_frame=[{"Time": [], "T1": []}],markers=True)
+fig = dict(data=[{'x': [], 'y': []}], )
 
 layout = dbc.Container([
 
@@ -118,7 +119,6 @@ def trigger_update_graph(n_clicks,n_intervals,button_state,figure,potencia):
         if(button_state == "Submeter"):
 
             lab[0] = tclab.TCLab()
-            data[0] = tclab.Historian(lab[0].sources)
 
             button_state_aux = button_state
         
