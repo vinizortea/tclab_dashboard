@@ -8,41 +8,29 @@ import pandas as pd
 from utils import graficos
 
 lab = [0]
-data = [0]
+data = {
+    "Time": [],
+    "T1": []
+}
 
 def tclab_conditions(n_intervals,potencia,button_state,component_id):
 
     lab[0].Q1(potencia)
-    # data[0].update(n_intervals)
-    data_append = dict(
-        x = n_intervals,
-        y = lab[0].T1
-    )
+    
+    data["Time"].append(n_intervals)
+    data["T1"].append(lab[0].T1)
 
-    #df = pd.DataFrame(data_append, columns=data[0].columns)
-    # data_append = {
-    #     "Time": df.iloc[-1:]["Time"],
-    #     "T1": df.iloc[-1:]["T1"]
-    # }
+    df = pd.DataFrame.from_records(data=data)
+    fig = px.line(df, x='Time', y='T1',markers=True)
 
     if button_state == "Parar" and component_id == "action-button":
         lab[0].Q1(0)
         lab[0].close()
 
-    return data_append
+    return fig
 
 dash.register_page(__name__, path='/', title='Pagina_1')
 
-# data_pag1 = {
-#     'Time': [1, 2, 3, 4, 5, 6, 7, 8, 9],
-#     'T1': [1, 2, 3, 4, 5, 6, 7, 8, 9] 
-# }
-
-measuring_limit = 100
-heating_limit = measuring_limit - 1
-
-# df = pd.DataFrame.from_records(data=data_pag1)
-# fig = px.line(data_frame=[{"Time": [], "T1": []}],markers=True)
 fig = dict(data=[{'x': [], 'y': []}], )
 
 layout = dbc.Container([
@@ -97,7 +85,7 @@ layout = dbc.Container([
 ],fluid=False),
 
 @callback(
-    Output("grafico-temperatura","extendData"),
+    Output("grafico-temperatura","figure"),
     Output("interval-component","disabled"),
     Output("interval-component","n_intervals"),
     Output("action-button","children"),
