@@ -2,13 +2,20 @@ from dash import Dash, dcc, html, Input, Output, State
 import dash
 import tclab
 import dash_bootstrap_components as dbc
+from dash.long_callback import DiskcacheLongCallbackManager
 
 from utils import graficos
+
+import diskcache
+
+cache = diskcache.Cache("./cache")
+long_callback_manager = DiskcacheLongCallbackManager(cache)
 
 app = dash.Dash(__name__,external_stylesheets=[dbc.themes.SOLAR],
                 meta_tags=[{'name': 'viewport',
                             'content': 'width=device-width, initial-scale=1.0'}],
-                use_pages=True, pages_folder="pages"
+                use_pages=True, pages_folder="pages",
+                long_callback_manager=long_callback_manager
                 )
 
 app.layout = html.Div([

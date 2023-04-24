@@ -1,11 +1,14 @@
 from dash import Dash, dcc, html, Input, Output, State, callback, ctx
 import dash
 import dash_bootstrap_components as dbc
+from dash.long_callback import DiskcacheLongCallbackManager
 import plotly.express as px
 import tclab
 import pandas as pd
 
 from utils import graficos
+
+app = dash.get_app()
 
 lab = [0]
 data = {
@@ -13,25 +16,36 @@ data = {
     "T1": []
 }
 
+# Fazer variável para ver se botão foi apertado durante execução do intervalo????
+
 def tclab_conditions(n_intervals,potencia,button_state,component_id):
 
-    lab[0].Q1(potencia)
+    if(button_state == "Parar" and component_id == "action-button"):
+        df = pd.DataFrame(data)
+        fig = px.line(df, x='Time', y='T1',markers=True)
+
+        lab[0].U1 = 0
+        lab[0].close()
+
+        return fig
+
+
+    lab[0].U1 = potencia
     
     data["Time"].append(n_intervals)
     data["T1"].append(lab[0].T1)
 
-    df = pd.DataFrame.from_records(data=data)
-    fig = px.line(df, x='Time', y='T1',markers=True)
+    print(len(data["T1"]))
+    print(len(data["Time"]))
 
-    if button_state == "Parar" and component_id == "action-button":
-        lab[0].Q1(0)
-        lab[0].close()
+    df = pd.DataFrame(data)
+    fig = px.line(df, x='Time', y='T1',markers=True)
 
     return fig
 
 dash.register_page(__name__, path='/', title='Pagina_1')
 
-fig = dict(data=[{'x': [], 'y': []}], )
+fig = dict(data=[{'Time': [], 'T1': []}], )
 
 layout = dbc.Container([
 
@@ -39,24 +53,29 @@ layout = dbc.Container([
         dbc.Col([
             dbc.Label("Escolha potência do aquecedor: ", class_name="d-flex justify-content-center text-success"),
             dcc.Slider(id="potencia", min=0, max=100, step=5, value=0),
+            # dbc.Row([
+            #     dbc.Col([
+            #         dcc.Input(placeholder="Tempo de medição",id="tempo_medicao",type="number",min=0,max=measuring_limit),
+            #     ],
+            #     width={"size":2}
+            #     ),
+            #     dbc.Col([
+            #         dcc.Input(placeholder="Tempo de aquecimento",id="tempo_aquecimento",type="number",min=0,max=heating_limit),
+            #     ],
+            #     width={"size":2}
+            #     )
+            # ],
+            # justify="around",
+            # class_name="my-2"
+            # ),
             dbc.Row([
                 dbc.Col([
-                    dcc.Input(placeholder="Tempo de medição",id="tempo_medicao",type="number",min=0,max=measuring_limit),
+                    dbc.Button("Submeter",id="submit-button", disabled=False,size="sm",color="success"),
                 ],
-                width={"size":2}
+                width={"size":1}
                 ),
                 dbc.Col([
-                    dcc.Input(placeholder="Tempo de aquecimento",id="tempo_aquecimento",type="number",min=0,max=heating_limit),
-                ],
-                width={"size":2}
-                )
-            ],
-            justify="around",
-            class_name="my-2"
-            ),
-            dbc.Row([
-                dbc.Col([
-                    dbc.Button("Submeter",id="action-button",size="sm",color="success"),
+                    dbc.Button("Parar",id="stop-button", disabled=True,size="sm",color="success"),
                 ],
                 width={"size":1}
                 )
@@ -75,6 +94,7 @@ layout = dbc.Container([
                     interval=1000,
                     n_intervals=0
                 ),
+                # dcc.Input(id="verify-change-on-callback",type="hidden",value=False)
             ]),
         ],
         width={"size":10, "offset":0}
@@ -85,8 +105,9 @@ layout = dbc.Container([
 ],fluid=False),
 
 @callback(
-    Output("grafico-temperatura","figure"),
+
     Output("interval-component","disabled"),
+    Output("grafico-temperatura","figure"),
     Output("interval-component","n_intervals"),
     Output("action-button","children"),
 
@@ -96,36 +117,78 @@ layout = dbc.Container([
     State("action-button","children"),
     State("grafico-temperatura","figure"),
     State('potencia','value'),
+    Input("interval-component","disabled"),
 
     prevent_initial_call = True
 )
-def trigger_update_graph(n_clicks,n_intervals,button_state,figure,potencia):
+def trigger_update_graph(n_clicks,n_intervals,button_state,figure,potencia,disabled):
     component_id = ctx.triggered_id
 
     if(component_id == "action-button"):
 
         if(button_state == "Submeter"):
 
+            print("entrou no if de submeter")
+
             lab[0] = tclab.TCLab()
 
             button_state_aux = button_state
         
-            return tclab_conditions(n_intervals,potencia,button_state_aux,component_id),False,0,"Parar"
+            return False,tclab_conditions(n_intervals,potencia,button_state_aux,component_id),n_intervals,"Parar"
         
         elif(button_state == "Parar"):
     
+            print("entrou no if de parar")
+
             button_state_aux = button_state
 
-            return tclab_conditions(n_intervals,potencia,button_state_aux,component_id),True,0,"Submeter"
+            return True,tclab_conditions(n_intervals,potencia,button_state_aux,component_id),n_intervals,"Submeter"
 
-    elif(component_id == "interval-component"):
+    elif(component_id == "interval-component" and disabled == False):
 
-        return tclab_conditions(n_intervals,potencia,button_state,component_id),False,n_intervals,"Parar"
+        print("entrou no if do interval")
+
+        return False,tclab_conditions(n_intervals,potencia,button_state,component_id),n_intervals,"Parar"
+
+# @app.long_callback(
+#     Output("submit-button","disabled"),
+#     Output("stop-button","disabled"),
+#     Output("interval-component","disabled"),
+
+#     Input("submit-button","n_clicks"),
+#     Input("stop-button","n_clicks"),
+
+#     prevent_initial_call = True
+# )
+# def activate_interval(n_clicks_submit,n_clicks_stop):
     
-# Utilizar outro tipo de data que não seja o Dataframe,
-# usar o mesmo do exemplo do cara do stackoverflow (padrão do python e dash)
+#     print("chamou")
+
+#     button_triggered = ctx.triggered_id
+
+#     if(button_triggered == "submit-button"):
+
+#         lab[0] = tclab.TCLab()
+
+#         return True,False,False
+    
+#     elif(button_triggered == "stop_button"):
+
+#         return False,True,True
 
 
-# Ver dcc.Interval para atualizar página automaticamente, se precisar.
-# Pode ajudar, ou não.
-# progress bar long_callback para att automaticamente
+# @app.long_callback(
+
+#     Output("grafico-temperatura","figure"),
+
+#     Input("interval-component","n_intervals"),
+
+#     State("potencia","value"),
+
+#     cancel=[Input("stop-button","n_clicks")],
+
+#     prevent_initial_call = True
+# )
+# def trigger_interval(n_clicks,n_intervals,potencia):
+
+#     return tclab_conditions(n_intervals,potencia)
